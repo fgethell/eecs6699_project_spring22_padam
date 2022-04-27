@@ -1,6 +1,6 @@
 # Partially  Adaptive Optimization  Algorithm  for  Deep  Convolution  Neural Networks to achieve faster  convergence  and  a better  generalization
 
-**E6699 Mathematics of Deep Learning - Final Project**
+**E6699 Mathematics of Deep Learning - Final Project (Spring 2022)**
 
 **Group Members:**
 Siddharth Nijhawan(sn2951)
