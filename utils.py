@@ -28,7 +28,10 @@ from torchvision.datasets import CIFAR100
 first_run = True
 
 def get_dataset(dataset, train_val_split = 0.9):
-    
+    '''
+    This function downloads the dataset chosen by the user, performs transformations on the dataset and outputs datagenerator objects for train/val/test sets
+    '''
+
     transform  = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
@@ -52,6 +55,9 @@ def get_dataset(dataset, train_val_split = 0.9):
 
 
 def get_dataloader(dataset, batch_size, train_val_split = 0.9, num_workers = 1):
+    '''
+    This function generates dataloader objects using get_dataset() function defined
+    '''
     
     if dataset not in ['cifar10', 'cifar100']:
         raise ValueError("Wrong dataset. Select one from ['cifar10', 'cifar100']")
@@ -64,6 +70,15 @@ def get_dataloader(dataset, batch_size, train_val_split = 0.9, num_workers = 1):
     return trainloader, valloader, testloader
 
 class Padam(Optimizer):
+    '''
+    This class defines the proposed Padam optimizer and contains the step function which performs optimization step during training process. Input parameters for the constructor are defined as follows:
+    lr: learning rate 
+    betas: beta values (beta1, beta2)
+    eps: epsilon value 
+    weight_decay: weight decay value
+    amsgrad_flag: flag for the use of amsgrad 
+    partial: p hyperparameter
+    '''
     
     def __init__(self, params, 
                  lr = 0.1, 
@@ -104,15 +119,16 @@ class Padam(Optimizer):
                 partial = group['partial']
 
                 curr_state = self.state[p]
-
+                
+                #Initialize the state of optimizer
                 if len(curr_state) == 0:
                     
                     curr_state['step'] = 0
-                    curr_state['exp_avg'] = torch.zeros_like(p.data)
-                    curr_state['exp_avg_square'] = torch.zeros_like(p.data)
+                    curr_state['exp_avg'] = torch.zeros_like(p.data) #Defines the exponential moving average of grad values
+                    curr_state['exp_avg_square'] = torch.zeros_like(p.data) #Defines the exponential moving average of squared grad values
                     
                     if amsgrad_flag:
-                        curr_state['max_exp_avg_square'] = torch.zeros_like(p.data)
+                        curr_state['max_exp_avg_square'] = torch.zeros_like(p.data) #Defines the max value of all exponential moving averages of squared grad values
 
                 exp_avg, exp_avg_square = curr_state['exp_avg'], curr_state['exp_avg_square']
                 
@@ -126,20 +142,20 @@ class Padam(Optimizer):
                 if group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha = group['weight_decay'])
 
-                exp_avg.mul_(beta1).add_(grad, alpha = 1 - beta1)
-                exp_avg_square.mul_(beta2).addcmul_(grad, grad, value = 1 - beta2)
+                exp_avg.mul_(beta1).add_(grad, alpha = 1 - beta1) #Decays the first and second order moments of grad values
+                exp_avg_square.mul_(beta2).addcmul_(grad, grad, value = 1 - beta2) #Decays the first and second order moments of squared grad values
                 
-                if amsgrad_flag:
-                    torch.max(max_exp_avg_square, exp_avg_square, out = max_exp_avg_square)
-                    denominator = max_exp_avg_square.sqrt().add_(group['eps'])
+                if amsgrad_flag: #Check whether to use amsgrad or not
+                    torch.max(max_exp_avg_square, exp_avg_square, out = max_exp_avg_square) #Compute the max of 2nd moment running averages till current iteration
+                    denominator = max_exp_avg_square.sqrt().add_(group['eps']) #Compute the denominator term using the max operator for normalizing running average
                     
                 else:
-                    denominator = exp_avg_square.sqrt().add_(group['eps'])
+                    denominator = exp_avg_square.sqrt().add_(group['eps']) #If amsgrad is not used, compute denominator using exponential average of squared grad values
 
-                bias1_correction = 1 - beta1 ** curr_state['step']
-                bias2_correction = 1 - beta2 ** curr_state['step']
+                bias1_correction = 1 - beta1 ** curr_state['step'] #Defines the correction for first bias term
+                bias2_correction = 1 - beta2 ** curr_state['step'] #Defines the correction for second bias term
                 
-                step_size = group['lr'] * math.sqrt(bias2_correction) / bias1_correction
+                step_size = group['lr'] * math.sqrt(bias2_correction) / bias1_correction #Compute the step size
 
                 p.data.addcdiv_(exp_avg, denominator**(partial*2), value = -step_size)
                 
