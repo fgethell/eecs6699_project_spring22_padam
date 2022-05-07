@@ -26,4 +26,6 @@ model.py - contains the master class for defining the neural network model, trai
 
 **Python Packages Installation:**
 
+```
 pip install numpy torch torchvision
+```
