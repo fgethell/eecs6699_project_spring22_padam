@@ -23,3 +23,7 @@ Execute the cells of notebooks cifar10_results.ipynb and cifar100_results.ipynb 
 utils.py - contains helper function for dataset generation and augmentation along with class definition for proposed Padam optimizer
 
 model.py - contains the master class for defining the neural network model, training on the input dataset and generating results via testing on validation set
+
+**Python Packages Installation:**
+
+pip install numpy torch torchvision
