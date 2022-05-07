@@ -29,3 +29,8 @@ model.py - contains the master class for defining the neural network model, trai
 ```
 pip install numpy torch torchvision
 ```
+**Pretrained models can be accessed here:**
+
+CIFAR-10 Models: https://drive.google.com/drive/folders/1UFEPL4mfnv7Mv33tArJi5bKh8vfVvwwU?usp=sharing
+
+CIFAR-100 Models: https://drive.google.com/drive/folders/1SYDTJgxqTL6ZOsA0aAbrIHeJ0zXpnBSo?usp=sharing
